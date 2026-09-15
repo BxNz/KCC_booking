@@ -19,11 +19,11 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: 5173,
+    port: 5180, // ปรับให้ตรงกับ Port ที่กำลังใช้งาน
     proxy: {
-      // เมื่อยิงคำขอไปที่ /api จะถูก Forward ไปที่ Backend IP 10.0.200.103:8018 เพื่อแก้ปัญหา CORS
+      // Forward คำขอ /api ไปยัง Server 115.84.105.127:9999
       '/api': {
-        target: 'http://10.0.200.103:8018',
+        target: 'http://115.84.105.127:9999',
         changeOrigin: true,
         secure: false,
       },

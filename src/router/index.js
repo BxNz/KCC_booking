@@ -6,11 +6,10 @@ import LoginView from '../views/LoginView.vue' // หรือ '../viewe/LoginVi
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'Home',
     component: App, // 👈 เรียกใช้งาน App ตรงนี้
-    meta: { requiresAuth: true }
-  },
+   },
   {
     path: '/login',
     name: 'Login',
