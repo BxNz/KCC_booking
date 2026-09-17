@@ -1,20 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// 1. เพิ่มบรรทัดนี้เพื่อ Import App.vue (เช็ก Path ให้ตรงกับที่เก็บไฟล์จริงของคุณ)
 import App from '../app/App.vue' 
-import LoginView from '../views/LoginView.vue' // หรือ '../viewe/LoginView.vue'
+import LoginView from '../views/LoginView.vue'
 
 const routes = [
   {
-    path: '/home',
-    name: 'Home',
-    component: App, // 👈 เรียกใช้งาน App ตรงนี้
+    path: '/',
+    name: 'home',
+    component: App, 
+    meta: { requiresAuth: true } // 1. กำหนดว่าหน้านี้ต้องเข้าสู่ระบบถึงจะดูได้
    },
   {
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { requiresGuest: true }
+    meta: { requiresGuest: true } // 2. กำหนดว่าถ้าล็อกอินแล้ว ห้ามเข้าหน้านี้
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: () => import('../views/Logout.vue')
   },
   {
     path: '/:pathMatch(.*)*',
@@ -27,15 +32,20 @@ const router = createRouter({
   routes
 })
 
-// Navigation Guard
+// Navigation Guard สำหรับตรวจสอบสิทธิ์
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('user-token')
 
+  // ถ้าหน้าที่จะไปต้องล็อกอิน แต่ไม่มี Token -> ดีดไปหน้า Login ทันที
   if (to.meta.requiresAuth && !token) {
     next('/login')
-  } else if (to.meta.requiresGuest && token) {
+  } 
+  // ถ้าเป็นหน้าสำหรับแขก (เช่น Login) แต่มี Token อยู่แล้ว -> ดีดกลับหน้าแรก
+  else if (to.meta.requiresGuest && token) {
     next('/')
-  } else {
+  } 
+  // กรณีอื่นๆ ปล่อยผ่านให้ทำงานปกติ (รวมถึงหน้า /logout ด้วย)
+  else {
     next()
   }
 })

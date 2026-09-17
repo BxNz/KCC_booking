@@ -8,20 +8,36 @@
 
       <div class="flex items-center space-x-5">
         <!-- Notification Button -->
-        <button class="relative text-slate-300 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-          </svg>
-          <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">2</span>
-        </button>
+        
 
         <!-- User Info -->
-        <div class="flex items-center space-x-2 pl-3 border-l border-slate-700">
-          <span class="text-slate-300 font-medium">KHOUANCHAY TRADING</span>
-          <div class="w-7 h-7 bg-rose-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm">
-            U
-          </div>
-        </div>
+       <!-- User Info with Dropdown -->
+<div class="relative">
+  <!-- ປຸ່ມກົດທີ່ຊື່ user (ເພີ່ມ @click ແລະ cursor-pointer) -->
+  <div 
+    @click="toggleDropdown" 
+    class="flex items-center space-x-2 pl-3 border-l border-slate-700 cursor-pointer select-none group"
+  >
+    <span class="text-slate-300 font-medium group-hover:text-white transition">KHOUANCHAY TRADING</span>
+    <div class="w-7 h-7 bg-rose-500 rounded-full flex items-center justify-center font-bold text-white text-xs shadow-sm">
+     
+    </div>
+  </div>
+
+  <!-- Dropdown Menu (ສະແດງເມື່ອ isOpen ເປັນ true) -->
+  <div 
+    v-if="isOpen" 
+    class="absolute right-0 mt-2 w-48 bg-white text-slate-700 rounded-lg shadow-lg py-1 border border-slate-200 z-50 text-xs"
+  >
+    <a href="#" @click.prevent="handleProfile" class="block px-4 py-2 hover:bg-slate-100 transition">
+      My Profile
+    </a>
+    <div class="border-t border-slate-100 my-1"></div>
+    <a href="#" @click.prevent="handleLogout" class="block px-4 py-2 text-rose-600 hover:bg-rose-50 transition font-medium">
+      Log out
+    </a>
+  </div>
+</div>
       </div>
     </div>
 
@@ -46,26 +62,46 @@
           </svg>
         </div>
 
-        <!-- Pagination Controls -->
-        <!-- <div class="text-xs text-slate-500 flex items-center space-x-2 border-l border-slate-200 pl-4">
-          <span class="font-medium">1-4 / 4</span>
-          <div class="inline-flex rounded-md shadow-2xs">
-            <button class="px-2 py-1 border border-slate-300 rounded-l-md bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-50 transition">&lt;</button>
-            <button class="px-2 py-1 border-t border-b border-r border-slate-300 rounded-r-md bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-50 transition">&gt;</button>
-          </div>
-        </div> -->
+       
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router' // 1. นำเข้า useRouter
+import Swal from 'sweetalert2' // (ถ้าต้องการใช้ป๊อปอัปแจ้งเตือน)
 
-const emit = defineEmits(['search'])
+const router = useRouter() // 2. สร้าง Router Instance
+const emit = defineEmits(['search', 'logout', 'profile'])
 const searchInput = ref('')
+const isOpen = ref(false) // เก็บสถานະເປີດ-ປິດ
 
-const emitSearch = () => {
-  emit('search', searchInput.value)
+const toggleDropdown = () => {
+  isOpen.value = !isOpen.value
+}
+
+// 3. เพิ่มฟังก์ชัน handleLogout ตรงนี้
+const handleLogout = async () => {
+  // เคลียร์ข้อมูลการเข้าสู่ระบบออกจาก LocalStorage
+  localStorage.removeItem('user-token')
+  localStorage.removeItem('username')
+  localStorage.removeItem('odoo_uid')
+
+  // ปิด Dropdown เมนูก่อน
+  isOpen.value = false
+
+  // (ทางเลือก) แสดงป๊อปอัปแจ้งเตือนความสำเร็จ
+  await Swal.fire({
+    icon: 'success',
+    title: 'ออกจากระบบสำเร็จ',
+    timer: 1000,
+    showConfirmButton: false,
+    timerProgressBar: true
+  })
+
+  // สั่งเปลี่ยนเส้นทางไปยังหน้า Login ทันที
+  router.push('/login')
 }
 </script>

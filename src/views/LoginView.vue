@@ -113,63 +113,84 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
-import { loginuser } from '@/app/api/loginapi'
-import Swal from 'sweetalert2'
+// นำเข้า (Import) ฟังก์ชันและไลบรารีที่จำเป็นสำหรับการทำงาน
+import { ref, reactive } from 'vue' // ใช้สร้าง Reactive variables
+import { useRouter } from 'vue-router' // ใช้สำหรับเปลี่ยนหน้า (Navigation)
+import axios from 'axios' // ไลบรารีสำหรับส่ง HTTP Request (ในที่นี้ไม่ได้ใช้โดยตรงเพราะเรียกผ่าน api)
+import { loginuser } from '@/app/api/loginapi' // ฟังก์ชันเรียก API สำหรับตรวจสอบการเข้าสู่ระบบ
+import Swal from 'sweetalert2' // ไลบรารีสำหรับแสดงป๊อปอัปแจ้งเตือนที่สวยงาม
 
+// สร้าง Instance ของ Vue Router เพื่อควบคุมการเปลี่ยนเส้นทางหน้าเว็บ
 const router = useRouter()
 
-const username = ref('')
-const password = ref('')
-const errorMessage = ref('')
- 
+// กำหนดตัวแปรเก็บค่าสถานะฟอร์ม (Reactive variables)
+const username = ref('') // เก็บค่าชื่อผู้ใช้ที่กรอกในฟอร์ม
+const password = ref('') // เก็บค่ารหัสผ่านที่กรอกในฟอร์ม
+const errorMessage = ref('') // เก็บข้อความแสดงข้อผิดพลาดเมื่อ Login ไม่ผ่าน
 
-const showPassword = ref(false)
-const loading = ref(false) 
+// กำหนดตัวแปรควบคุมการแสดงผลเพิ่มเติม
+const showPassword = ref(false) // สถานะสำหรับซ่อน/แสดงรหัสผ่าน (Toggle password visibility)
+const loading = ref(false) // สถานะกำลังโหลด (Loading state) ขณะรอผลจาก API
+
+// ฟังก์ชันหลักสำหรับจัดการกระบวนการ Login
 const handleLogin = async () => {
   try {
+    // 1. รีเซ็ตข้อความ Error ให้เป็นค่าว่างก่อนเริ่มส่ง Request ใหม่ทุกครั้ง
     errorMessage.value = ''
+    
+    // 2. เรียกใช้งาน API loginuser โดยส่ง username และ password ไปตรวจสอบ
     const result = await loginuser(username.value, password.value)
+    
+    // 3. ตรวจสอบเงื่อนไข: หากผลลัพธ์ (result) มีค่าเป็นจริง (เข้าสู่ระบบสำเร็จ)
     if (result) {
-      // Save login information 
-      localStorage.setItem('user-token', result.access_token)
-      localStorage.setItem('username', result.name)
-      localStorage.setItem('odoo_uid', result.uid) // Success message 
+      // Save login information (บันทึกข้อมูลการเข้าสู่ระบบลงใน LocalStorage ของเบราว์เซอร์)
+      localStorage.setItem('user-token', result.access_token) // บันทึก Token สำหรับยืนยันตัวตน
+      localStorage.setItem('username', result.name) // บันทึกชื่อผู้ใช้
+      localStorage.setItem('odoo_uid', result.uid) // บันทึก User ID จากระบบ Odoo
+      
+      // Success message (แสดงป๊อปอัปแจ้งเตือนเมื่อเข้าสู่ระบบสำเร็จ)
       await Swal.fire({
-        icon: 'success',
-        title: 'Login Successful!',
-        text: 'ยินดีต้อนรับเข้าสู่ระบบ',
-        confirmButtonColor: '#0d6efd',
-        timer: 1500,
-        timerProgressBar: true,
-      }) // Go to dashboard 
+        icon: 'success', // ไอคอนรูปติ๊กถูกสีเขียว (สำเร็จ)
+        title: 'Login Successful!', // หัวข้อป๊อปอัป
+        text: 'ยินดีต้อนรับเข้าสู่ระบบ', // ข้อความรายละเอียด
+        confirmButtonColor: '#0d6efd', // สีปุ่มยืนยัน
+        timer: 1500, // ตั้งเวลาให้ปิดป๊อปอัปอัตโนมัติใน 1.5 วินาที
+        timerProgressBar: true, // แสดงแถบเวลาถอยหลัง
+      }) 
+      
+      // Go to dashboard (นำทางผู้ใช้ไปยังหน้าแดชบอร์ดหรือหน้าแรกของระบบ)
       router.push('/')
     }
+    // 4. กรณีที่ผลลัพธ์ไม่สำเร็จ (เช่น รหัสผ่านหรือชื่อผู้ใช้ไม่ถูกต้อง)
     else {
+      // ดึงข้อความ error จาก API หรือกำหนดข้อความสำรองภาษาไทย
       errorMessage.value = result?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+      
+      // แสดงป๊อปอัปแจ้งเตือนข้อผิดพลาด
       Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: errorMessage.value,
-        confirmButtonColor: '#dc3545',
+        icon: 'error', // ไอคอนกากบาทสีแดง (เกิดข้อผิดพลาด)
+        title: 'Login Failed', // หัวข้อป๊อปอัป
+        text: errorMessage.value, // ข้อความแสดงสาเหตุที่ผิดพลาด
+        confirmButtonColor: '#dc3545', // สีปุ่มยืนยัน
       })
     }
   }
+  // 5. ดักจับข้อผิดพลาดกรณีที่เกิดปัญหาทางเทคนิค (เช่น เชื่อมต่อ Backend ไม่ได้, Server ล่ม)
   catch (error) {
+    // พิมพ์ Log ข้อผิดพลาดลงใน Console ของเบราว์เซอร์เพื่อใช้Debug
     console.error('Login Connection Error:', error)
+    
+    // กำหนดข้อความ Error แจ้งเตือนการเชื่อมต่อ
     errorMessage.value = 'ไม่สามารถเชื่อมต่อกับ Server หลังบ้านได้'
+    
+    // แสดงป๊อปอัปแจ้งเตือนปัญหาการเชื่อมต่อ Odoo Service
     Swal.fire({
-      icon: 'warning',
-      title: 'Connection Error',
-      text: 'ไม่สามารถเชื่อมต่อกับ Server หลังบ้านได้ กรุณาเช็คการรัน Service ของ Odoo',
-      confirmButtonColor: '#ffc107',
+      icon: 'warning', // ไอคอนเตือนสีเหลือง
+      title: 'Connection Error', // หัวข้อป๊อปอัป
+      text: 'ไม่สามารถเชื่อมต่อกับ Server หลังบ้านได้ กรุณาเช็คการรัน Service ของ Odoo', // ข้อความแนะนำวิธีแก้เบื้องต้น
+      confirmButtonColor: '#ffc107', // สีปุ่มยืนยัน
     })
   }
-}
-const handleImageError = (e) => {
-  e.target.src = 'https://via.placeholder.com/150x60?text=KC+Logo'
 }
 </script>
 <style scoped>

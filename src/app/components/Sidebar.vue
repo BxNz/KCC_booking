@@ -3,10 +3,15 @@
     <div>
       <!-- Logo App -->
       <div class="p-4 bg-[#131E28] text-white font-bold flex items-center gap-3 border-b border-slate-700/50">
-        <div class="w-6 h-6 bg-teal-400 rounded-md flex items-center justify-center font-black text-[#131E28] text-xs">
-          K
+        <!-- ປັບຂະໜາດໃຫ້ໃຫຍ່ຂຶ້ນເປັນ w-14 h-14 -->
+        <div class="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 p-1 border border-slate-700">
+          <img 
+            src="http://115.84.105.127:9999/api/company/logo/image" 
+            alt="Company Logo" 
+            class="w-full h-full object-contain"
+          />
         </div>
-        <span class="text-sm tracking-wide">Booking System</span>
+        <span class="text-sm tracking-wide truncate">Booking System</span>
       </div>
 
       <!-- Navigation Menu -->
@@ -29,7 +34,7 @@
     <!-- Company Badge -->
     <div class="p-3 bg-slate-800/60 m-3 rounded-xl border border-slate-700/50 text-center">
       <div class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Powered By</div>
-      <div class="text-xs text-teal-400 font-extrabold mt-0.5">KC KHOUANCHAY</div>
+      <div class="text-xs text-teal-400 font-extrabold mt-0.5">KCC KHOUANCHAY</div>
     </div>
   </aside>
 </template>
@@ -41,9 +46,5 @@ const menuItems = ref([
   { name: 'Booking Rooms', icon: '🏢', href: '#', active: true },
   { name: 'Booking Cars', icon: '🚘', href: '#', active: false },
   { name: 'IT Tickets', icon: '🎫', href: '#', active: false },
-  { name: 'Designer Tickets', icon: '🎨', href: '#', active: false },
-  { name: 'To-do List', icon: '📌', href: '#', active: false },
-  { name: 'Project', icon: '📁', href: '#', active: false },
-  { name: 'Inventory', icon: '📦', href: '#', active: false },
 ])
 </script>
