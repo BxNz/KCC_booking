@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
-import App from './app/App.vue' // เช็ก Path ให้ตรงกับตำแหน่ง App.vue จริงของคุณ
-import router from './router'
+import App from './app/App.vue'
+import router from './app/router'
 import '../styles/style.css'
 
 createApp(App).use(router).mount('#app')

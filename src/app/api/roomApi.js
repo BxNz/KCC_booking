@@ -10,9 +10,9 @@ const api = axios.create({
 
 // 🛡️ แนบ Token อัตโนมัติทุกครั้งที่มีการ Request (ถ้ามีเก็บไว้ใน localStorage)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') || localStorage.getItem('user-token')
+  const token = localStorage.getItem('user-token') || localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `token ${token}`
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 }, (error) => {
@@ -22,13 +22,23 @@ api.interceptors.request.use((config) => {
 export const getMeetingRooms = async () => {
   try {
     const response = await api.get('/api/bookings')
-    const data = response.data
-    console.log("response.data",response.data)
+    if (response.data?.status === false) {
+      throw new Error(response.data.message || 'Unable to load meeting rooms')
+    }
+
+    const data = Array.isArray(response.data)
+      ? response.data
+      : response.data?.results || response.data?.data || response.data?.bookings || []
+
     return data.map(item => ({
       id: item.id || item.room_id,
-      name: item.name || item.room_name,
-      capacity: item.capacity ? `ຮອງຮັບໄດ້ ${item.capacity} ຄົນ` : 'ບໍ່ລະບຸຈຳນວນ',
-      bookings: item.bookings || item.reservations || []
+      name: item.name || item.room_name || 'ບໍ່ລະບຸຊື່ຫ້ອງ',
+      capacity: item.capacity,
+      state: item.state || 'unavailable',
+      typeName: item.type_name || item.type?.name || '',
+      bookings: Array.isArray(item.bookings)
+        ? item.bookings
+        : Array.isArray(item.reservations) ? item.reservations : []
     }))
   } catch (error) {
     console.error('API Fetch Error (getMeetingRooms):', error)

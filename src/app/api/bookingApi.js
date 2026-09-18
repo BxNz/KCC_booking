@@ -10,9 +10,9 @@ const api = axios.create({
 
 // 🛡️ แนบ Token อัตโนมัติทุกครั้งที่มีการ Request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') || localStorage.getItem('user-token')
+  const token = localStorage.getItem('user-token') || localStorage.getItem('token')
   if (token) {
-    config.headers.Authorization = `token ${token}`
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 }, (error) => {

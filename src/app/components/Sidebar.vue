@@ -47,7 +47,7 @@ const route = useRoute()
 // ປ່ຽນຈາກ href ເປັນ path ໃຫ້ກົງກັບ router/index.js
 const menuItems = ref([
   //{ name: 'Home', icon: '🏠', path: '/home' },
-  { name: 'Booking Rooms', icon: '🏢', path: '/home' },
+  { name: 'Booking Rooms', icon: '🏢', path: '/' },
   { name: 'Booking Cars', icon: '🚘', path: '/booking-cars' }, // ປັບຕາມ router ທີ່ມີ
   { name: 'IT Tickets', icon: '🎫', path: '/it-tickets' },     // ປັບຕາມ router ທີ່ມີ
 ])
