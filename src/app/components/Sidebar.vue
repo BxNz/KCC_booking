@@ -50,7 +50,7 @@ const menuItems = ref([
   { name: 'Booking Cars', icon: '🚘', path: '/booking-cars' }, // ປັບຕາມ router ທີ່ມີ
   { name: 'IT Tickets', icon: '🎫', path: '/it-tickets' },     // ປັບຕາມ router ທີ່ມີ
   { name: 'Room History', icon: '📋', path: '/meeting-rooms' },
-  { name: 'My Profile', icon: '👤', path: '/profile' },
+  // { name: 'My Profile', icon: '👤', path: '/profile' },
   { name: 'Log out', icon: '↪', path: '/logout' }
 ])
 

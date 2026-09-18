@@ -15,5 +15,6 @@ export const loginuser = async(login,password)=>{
         // console.log("Full Response:", response.data)
     return response.data
 }
-
+// 2. ตัวแปรสำหรับดึงรูปโลโก้บริษัท (นำไปใช้ใน src ของแท็ก img ได้เลย)
+export const companyLogoUrl = `${BASE_URL}/api/company/logo/image`
 export default api

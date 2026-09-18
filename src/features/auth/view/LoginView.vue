@@ -5,9 +5,10 @@
 
     <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-sm p-8 transition-all relative z-10">
       <div class="flex flex-col items-center mb-6">
-        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner mb-3">
-          <img src="http://115.84.105.127:9999/api/company/logo/image" alt="KC Logo" class="h-14 object-contain mx-auto" />
-        </div>
+       <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner mb-3">
+    <!-- ผูกค่า src เข้ากับตัวแปร logoUrl -->
+    <img :src="logoUrl" alt="KC Logo" class="h-14 object-contain mx-auto" />
+</div>
         <h1 class="text-lg font-bold text-slate-800 tracking-tight">ເຂົ້າໃຊ້ລະບົບ</h1>
         <p class="text-[11px] text-slate-400 font-medium tracking-wide">KCC KHOUANCHAY GROUP</p>
       </div>
@@ -64,7 +65,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import Swal from 'sweetalert2'
+import api, { loginuser, companyLogoUrl } from './api.js'
 
+
+const logoUrl = companyLogoUrl
 const router = useRouter()
 const { login, loading, error } = useAuth()
 const username = ref('')
