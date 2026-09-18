@@ -1,25 +1,44 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-import App from '../app/App.vue' 
+import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import Logout from '../views/Logout.vue'
+import ProfileView from '../views/ProfileView.vue'
+import MeetingRooms from '../views/MeetingRoomsView.vue'
+ import AddBooking from '../views/AddBookingModal.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: App, 
-    meta: { requiresAuth: true } // 1. กำหนดว่าหน้านี้ต้องเข้าสู่ระบบถึงจะดูได้
-   },
+    component: HomeView, 
+    meta: { requiresAuth: true } // ຕ້ອງ Login ແລ້ວຈຶ່ງເຂົ້າໄດ້[cite: 1]
+  },
   {
     path: '/login',
     name: 'Login',
     component: LoginView,
-    meta: { requiresGuest: true } // 2. กำหนดว่าถ้าล็อกอินแล้ว ห้ามเข้าหน้านี้
+    meta: { requiresGuest: true } // Login ແລ້ວຫ້າມເຂົ້ານີ້[cite: 1]
   },
   {
     path: '/logout',
     name: 'logout',
-    component: () => import('../views/Logout.vue')
+    component: Logout
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/meeting-rooms/:id?', 
+    name: 'MeetingRooms',
+    component: MeetingRooms 
+  },
+  {
+    path: '/booking/:id?', 
+    name: 'book',
+    component: AddBooking 
   },
   {
     path: '/:pathMatch(.*)*',
@@ -32,21 +51,16 @@ const router = createRouter({
   routes
 })
 
-// Navigation Guard สำหรับตรวจสอบสิทธิ์
+// Navigation Guard ตรวจสอบสิทธิ์ก่อนเปลี่ยนหน้า
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user-token')
 
-  // ถ้าหน้าที่จะไปต้องล็อกอิน แต่ไม่มี Token -> ดีดไปหน้า Login ทันที
   if (to.meta.requiresAuth && !token) {
-    next('/login')
-  } 
-  // ถ้าเป็นหน้าสำหรับแขก (เช่น Login) แต่มี Token อยู่แล้ว -> ดีดกลับหน้าแรก
-  else if (to.meta.requiresGuest && token) {
-    next('/')
-  } 
-  // กรณีอื่นๆ ปล่อยผ่านให้ทำงานปกติ (รวมถึงหน้า /logout ด้วย)
-  else {
-    next()
+    next('/login') // ບໍ່ມີ Token -> ດີດໄປໜ້າ Login[cite: 1]
+  } else if (to.meta.requiresGuest && token) {
+    next('/') // ມີ Token ແລ້ວແຕ່ຢາກເຂົ້າ Login -> ດີດກັບໜ້າ Home[cite: 1]
+  } else {
+    next() // ຜ່ານໄດ້ປົກກະຕິ[cite: 1]
   }
 })
 

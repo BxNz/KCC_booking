@@ -12,6 +12,7 @@ export const loginuser = async(login,password)=>{
         login,
         password
         } )
+        // console.log("Full Response:", response.data)
     return response.data
 }
 
