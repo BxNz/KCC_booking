@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // กำหนด Base URL และ Axios Instance
 const api = axios.create({
-  baseURL: 'http://115.84.105.127:9999',
+  baseURL: import.meta.env.API_URL,
   headers: {
     'Content-Type': 'application/json'
   }

@@ -5,7 +5,7 @@
       <div class="p-4 bg-[#131E28] text-white font-bold flex items-center gap-3 border-b border-slate-700/50">
         <div class="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 p-1 border border-slate-700">
           <img 
-            src="http://115.84.105.127:9999/api/company/logo/image" 
+            :src="logoUrl"
             alt="Company Logo" 
             class="w-full h-full object-contain"
           />
@@ -43,6 +43,7 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+const logoUrl = `${import.meta.env.API_URL}/api/company/logo/image`
 
 // ປ່ຽນຈາກ href ເປັນ path ໃຫ້ກົງກັບ router/index.js
 const menuItems = ref([

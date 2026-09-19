@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'http://115.84.105.127:9999/api'
+const API_URL = `${import.meta.env.API_URL}/api`
 
 export const createBooking = async (bookingData) => {
   try {

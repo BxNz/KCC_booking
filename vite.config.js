@@ -1,12 +1,16 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
+  envPrefix: ['VITE_', 'API_'],
   plugins: [
     vue(),
     tailwindcss(),
@@ -21,12 +25,13 @@ export default defineConfig({
     host: true,
     port: 5180, // ปรับให้ตรงกับ Port ที่กำลังใช้งาน
     proxy: {
-      // Forward คำขอ /api ไปยัง Server 115.84.105.127:9999
+      // Forward API requests to the configured backend.
       '/api': {
-        target: 'http://115.84.105.127:9999',
+        target: env.API_URL,
         changeOrigin: true,
         secure: false,
       },
     },
   },
+  }
 })

@@ -6,7 +6,7 @@
     <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 w-full max-w-sm p-8 transition-all relative z-10">
       <div class="flex flex-col items-center mb-6">
         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner mb-3">
-          <img src="http://115.84.105.127:9999/api/company/logo/image" alt="KC Logo" class="h-14 object-contain mx-auto" />
+          <img :src="logoUrl" alt="KC Logo" class="h-14 object-contain mx-auto" />
         </div>
         <h1 class="text-lg font-bold text-slate-800 tracking-tight">ເຂົ້າໃຊ້ລະບົບ</h1>
         <p class="text-[11px] text-slate-400 font-medium tracking-wide">KCC KHOUANCHAY GROUP</p>
@@ -71,6 +71,7 @@ const username = ref('')
 const password = ref('')
 const errorMessage = error
 const showPassword = ref(false)
+const logoUrl = `${import.meta.env.API_URL}/api/company/logo/image`
 
 const handleLogin = async () => {
   try {
