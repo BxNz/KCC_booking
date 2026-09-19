@@ -21,7 +21,7 @@ api.interceptors.request.use((config) => {
 
 export const getMeetingRooms = async () => {
   try {
-    const response = await api.get('/api/bookings')
+    const response = await api.get('/api/bookings?type_id=1')
     if (response.data?.status === false) {
       throw new Error(response.data.message || 'Unable to load meeting rooms')
     }
