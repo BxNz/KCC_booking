@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.API_URL
+
 // กำหนด Base URL และ Axios Instance
 const api = axios.create({
-  baseURL: import.meta.env.API_URL,
+  baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -15,5 +17,4 @@ export const loginuser = async(login,password)=>{
         // console.log("Full Response:", response.data)
     return response.data
 }
-
 export default api
