@@ -1,46 +1,21 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router' //  นำเข้า useRoute สำหรับรับค่า Query จาก URL
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from '@/app/components/Navbar.vue'
 import Sidebar from '@/app/components/Sidebar.vue'
-import { getMeetingBookings } from '@/app/api/bookingApi.js'
+import { useBookingEvents } from './composables/useBookingEvents'
 
-const route = useRoute() //  เรียกใช้งาน route
-
-// ตัวแปรเก็บข้อมูลการจองห้องประชุม
-const bookings = ref([])
-const loading = ref(true)
-const errorMessage = ref('')
-const searchQuery = ref('')
-
-// ตัวแปรเก็บข้อมูลห้องที่ถูกเลือกส่งมาจากหน้าอื่น
+const route = useRoute()
 const selectedRoomId = ref(null)
 const selectedRoomName = ref('')
 
-// ฟังก์ชันดึงข้อมูลจาก API
-const fetchBookingsData = async () => {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    // 🌐 เรียกใช้งานผ่านไฟล์ API แยก
-    const data = await getMeetingBookings()
-    bookings.value = data
-
-  } catch (error) {
-    errorMessage.value = 'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບ API ໄດ້, ກຳລັງສະແດງຂໍ້ມູນຕົວຢ່າງ'
-    
-    // 🛡️ ข้อมูลสำรอง (Mock Data) กรณีเชื่อมต่อ API ไม่ผ่าน
-    bookings.value = [
-      { id: 1, code: 'BK00001', title: 'ປະຊຸມວຽກປະຈຳອາທິດ', start_time: '10/08/2026 14:00:00', end_time: '10/08/2026 15:00:00', duration: '1.00', requester: 'ນ.ທິບພະດອນ ປາດາກະສາດ', department: 'ການຄ້າ', room: 'ຫ້ອງປະຊຸມໃຫຍ່ (Grand)', status: 'ອນຸມັດແລ້ว' },
-      { id: 2, code: 'BK00002', title: 'ວາງແຜນການຕະຫຼາດ Q3', start_time: '10/08/2026 15:00:18', end_time: '10/08/2026 17:00:18', duration: '2.00', requester: 'ນ.ສວອນສະຫວັນ ພະນະວົງ', department: 'ການຕະຫຼາດ', room: 'ຫ້ອງປະຊຸມໃຫຍ່ (Grand)', status: 'ລໍຖ້າອນຸມັດ' },
-      { id: 3, code: 'BK00018', title: 'ຕິດຕາມໂຄງການໄອທີ', start_time: '11/08/2026 10:00:00', end_time: '11/08/2026 12:00:00', duration: '2.00', requester: 'ນ.ພັດທະນະອນ ຊຸມພົນປາເຍາ', department: 'ຝ່າຍດຳເນີນງານ', room: 'ຫ້ອງປະຊຸມໃຫຍ່ (Grand)', status: 'ອນຸມັດແລ້ว' },
-      { id: 4, code: 'BK00024', title: 'ອບຮົມລະບົບໃໝ່ KCC', start_time: '11/08/2026 14:00:00', end_time: '11/08/2026 15:00:00', duration: '1.00', requester: 'ນ.ວັນສິນ ມິສະສີ', department: 'ການຄ້າ', room: 'ຫ້ອງປະຊຸມໃຫຍ່ (Grand)', status: 'ອນຸມັດແລ້ວ' },
-      { id: 5, code: 'BK00016', title: 'ປະຊຸມຄະນະບໍລິຫານ', start_time: '12/08/2026 10:00:00', end_time: '12/08/2026 12:00:00', duration: '2.00', requester: 'ນ.ດາວາວອນ ທຳມະວົງ', department: 'ບໍລິຫານ', room: 'ຫ້ອງປະຊຸມກາງ (Medium)', status: 'ກຳລັງພິຈາລະນາ' }
-    ]
-  } finally {
-    loading.value = false
-  }
-}
+const {
+  loading,
+  errorMessage,
+  searchQuery,
+  filteredBookings,
+  loadBookings: fetchBookingsData
+} = useBookingEvents(selectedRoomId, selectedRoomName)
 
 onMounted(() => {
   // 📥 ตรวจสอบค่าที่ส่งผ่านมาทาง URL Query ตอนเปิดหน้า
@@ -54,36 +29,9 @@ onMounted(() => {
   fetchBookingsData()
 })
 
-// ค้นหาข้อมูลจาก Navbar หรือช่องค้นหาในหน้า
 const handleSearch = (keyword) => {
   searchQuery.value = keyword
 }
-
-// กรองข้อมูลทั้งจากช่องค้นหา (Search) และห้องที่ถูกเลือกส่งมาจากหน้าอื่น (Room Filter)
-const filteredBookings = computed(() => {
-  let result = bookings.value
-
-  // 1. กรองตามชื่อห้องที่ถูกส่งข้ามมา (ถ้ามี)
-  if (selectedRoomName.value) {
-    result = result.filter(item => 
-      item.room && item.room.toLowerCase().includes(selectedRoomName.value.toLowerCase())
-    )
-  }
-
-  // 2. กรองตามคำค้นหา (Search Keyword)
-  if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase()
-    result = result.filter(item => 
-      item.code.toLowerCase().includes(q) ||
-      item.title.toLowerCase().includes(q) ||
-      item.requester.toLowerCase().includes(q) ||
-      item.department.toLowerCase().includes(q) ||
-      (item.room && item.room.toLowerCase().includes(q))
-    )
-  }
-
-  return result
-})
 
 const handleNewBooking = () => {
   alert('ເປີດຟອມສ້າງການຈອງຫ້ອງປະຊຸມໃໝ່')
@@ -156,7 +104,7 @@ const clearRoomFilter = () => {
               รายการทั้งหมด: <strong class="text-slate-800">{{ filteredBookings.length }}</strong> รายการ
             </div>
             <div class="flex items-center space-x-2 text-xs text-slate-400">
-              <span>ສະແດງຜົນໜ້າຈໍແບບ Real-time</span>
+              <span>ສະແດງທັງໝົດ {{ filteredBookings.length }} ລາຍການ</span>
             </div>
           </div>
 
@@ -173,15 +121,16 @@ const clearRoomFilter = () => {
             <table class="w-full text-left border-collapse text-xs">
               <thead>
                 <tr class="bg-slate-100/70 text-slate-600 font-semibold border-b border-slate-200">
-                  <th class="py-3 px-4">ລະຫັດການຈອງ (Code)</th>
-                  <th class="py-3 px-4">ຫົວຂໍ້ / ລາຍລະອຽດ</th>
+                  <th class="py-3 px-4">Booking ID</th>
+                  <th class="py-3 px-4">ຊື່ການຈອງ</th>
                   <th class="py-3 px-4">ຫ້ອງປະຊຸມ</th>
                   <th class="py-3 px-4">ເລີ່ມຕົ້ນ (Start)</th>
                   <th class="py-3 px-4">ສິ້ນສຸດ (End)</th>
                   <th class="py-3 px-4 text-center">ຊົ່ວໂມງ</th>
-                  <th class="py-3 px-4">ຜູ້ຈອງ</th>
-                  <th class="py-3 px-4">ພາກສ່ວນ / ຝ່າຍ</th>
-                  <th class="py-3 px-4">ສະຖານະ</th>
+                  <th class="py-3 px-4">Driver</th>
+                  <th class="py-3 px-4">Rider</th>
+                  <th class="py-3 px-4">Priority</th>
+                  <th class="py-3 px-4">Description</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -199,28 +148,23 @@ const clearRoomFilter = () => {
                   <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">{{ item.end_time }}</td>
                   <td class="py-3.5 px-4 text-center font-semibold text-slate-700">{{ item.duration }}</td>
                   <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">{{ item.requester }}</td>
-                  <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
-                    <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium text-[11px]">
-                      {{ item.department }}
-                    </span>
-                  </td>
+                  <td class="py-3.5 px-4 text-slate-700 whitespace-nowrap">{{ item.department }}</td>
                   <td class="py-3.5 px-4 whitespace-nowrap">
                     <span 
                       class="px-2.5 py-1 rounded-full text-[11px] font-medium"
-                      :class="{
-                        'bg-emerald-50 text-emerald-700 border border-emerald-200': item.status === 'ອນຸມັດແລ້ວ',
-                        'bg-amber-50 text-amber-700 border border-amber-200': item.status === 'ລໍຖ້າອນຸມັດ' || item.status === 'ກຳລັງພິຈາລະນາ',
-                        'bg-rose-50 text-rose-700 border border-rose-200': item.status === 'ຍົກເລີກ'
-                      }"
+                      :class="item.status === 'urgent' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'"
                     >
                       {{ item.status }}
                     </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate" :title="item.description_text">
+                    {{ item.description_text }}
                   </td>
                 </tr>
 
                 <!-- Empty State -->
                 <tr v-if="filteredBookings.length === 0">
-                  <td colspan="9" class="text-center py-12 text-slate-400">
+                  <td colspan="10" class="text-center py-12 text-slate-400">
                     ບໍ່ພົບຂໍ້ມູນການຈອງຫ້ອງປະຊຸມໃນຂະນະນີ້
                   </td>
                 </tr>
@@ -230,7 +174,7 @@ const clearRoomFilter = () => {
 
           <!-- Table Footer Pagination Info -->
           <div class="px-6 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
-            <span>ສະແດງຜົນ 1 - {{ filteredBookings.length }} ຈາກທັງໝົດ {{ filteredBookings.length }} รายการ</span>
+            <span>ສະແດງ 1 - {{ filteredBookings.length }} ຈາກທັງໝົດ {{ filteredBookings.length }} ລາຍການ</span>
             <div class="flex items-center space-x-1">
               <button class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 cursor-pointer" disabled>ກ່ອນໜ້າ</button>
               <button class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 cursor-pointer">ຖัดไป</button>

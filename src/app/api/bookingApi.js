@@ -34,7 +34,8 @@ export const getBookingTypes = async () => {
  */
 export const getMeetingBookings = async () => {
   const response = await api.get('/api/bookings')
-  return response.data
+  const bookings = normalizeCollection(response.data)
+  return bookings.map(normalizeBooking)
 }
 
 /**
@@ -43,7 +44,7 @@ export const getMeetingBookings = async () => {
  */
 export const getBookingsByType = async (typeId) => {
   const response = await api.get(`/api/bookings?type_id=${typeId}`)
-  return response.data
+  return normalizeCollection(response.data)
 }
 
 /**
@@ -52,7 +53,45 @@ export const getBookingsByType = async (typeId) => {
  */
 export const getBookingEvents = async (bookingId) => {
   const response = await api.get(`/api/booking/events?booking_id=${bookingId}`)
-  return response.data
+  return normalizeCollection(response.data).map(normalizeBooking)
+}
+
+const normalizeCollection = (response) => {
+  if (Array.isArray(response)) return response
+
+  const collection = response?.results || response?.data || response?.bookings || response?.events
+  return Array.isArray(collection) ? collection : []
+}
+
+const normalizeBooking = (item) => ({
+  ...item,
+  id: item.id || item.booking_id || item.event_id,
+  code: item.code || item.booking_code || item.reference || item.booking_id || '-',
+  title: item.title || item.meeting_title || item.name || '-',
+  room: item.room || item.room_name || item.item_name || item.item?.name || item.booking_name || '-',
+  start_time: item.start_time || item.start_date || item.date_start || item.start || '-',
+  end_time: item.end_time || item.stop_date || item.date_end || item.stop || '-',
+  duration: item.duration || item.hours || calculateDuration(item.start, item.stop),
+  requester: item.requester || item.username || item.user_name || item.created_by || item.driver_name || '-',
+  department: item.department || item.department_name || item.rider_name || '-',
+  status: item.status || item.state || item.priority || '-',
+  description_text: htmlToText(item.description)
+})
+
+const htmlToText = (value) => {
+  if (!value) return '-'
+  if (typeof document === 'undefined') return String(value).replace(/<[^>]*>/g, '').trim() || '-'
+
+  const container = document.createElement('div')
+  container.innerHTML = String(value)
+  return container.textContent?.trim() || '-'
+}
+
+const calculateDuration = (start, stop) => {
+  if (!start || !stop) return '-'
+
+  const duration = (new Date(stop) - new Date(start)) / (1000 * 60 * 60)
+  return Number.isFinite(duration) ? `${duration} hr` : '-'
 }
 
 export default api

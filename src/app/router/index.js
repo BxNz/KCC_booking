@@ -3,7 +3,7 @@ import HomeView from '@/features/Home/views/HomeView.vue'
 import LoginView from '@/features/auth/view/LoginView.vue'
 import Logout from '@/features/auth/view/Logout.vue'
 import ProfileView from '@/features/profiles/ProfileView.vue'
-import MeetingRooms from '@/features/bookings/MeetingRoomsView.vue'
+import MeetingRooms from "@/features/bookings/BookingEvents.vue";
 import AddBooking from '@/features/bookings/AddBookingModal.vue'
 
 const routes = [

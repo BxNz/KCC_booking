@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { createBooking } from '@/app/api/addbook.js'
+import { toRef } from 'vue'
+import { useBookingForm } from './composables/useBookingForm'
 
 const props = defineProps({
   room: {
@@ -14,96 +14,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'save'])
-
-const loading = ref(false)
-const errorMessage = ref('')
-
-// 🌟 ໃຫ້ວັນທີ ແລະ ເວລາ ຢູ່ໃນຊ່ອງ Text ດຽວກັນ
-const form = ref({
-  startDate: '25/09/2026 17:00:00', // ຮູບແບບ DD/MM/YYYY HH:mm:ss
-  endDate: '25/09/2026 18:00:00',   // ຮູບແບບ DD/MM/YYYY HH:mm:ss
-  meetingTitle: '',      
-  departmentCreator: '', 
-  departmentUser: '',    
-  participantsCount: 0,  
-  tel: '',               
-  username: '',          
-  additionalUser: '',    
-  objective: '',         
-  priority: 'normal'     // ຄ່າ: 'basic', 'normal', 'Urgent'
-})
-
-onMounted(() => {
-  const storedUser = localStorage.getItem('username')
-  if (storedUser) {
-    form.value.username = storedUser
-    form.value.additionalUser = storedUser
-  } else {
-    form.value.username = 'ບ.ພັດທະໄຊ ລົງຖາວັດ'
-    form.value.additionalUser = 'ບ.ພັດທະໄຊ ລົງຖາວັດ'
-  }
-})
-
-const setPriority = (level) => {
-  form.value.priority = level
-}
-
-// 🌟 ຟັງຊັນຊ່ວຍແຍກ "DD/MM/YYYY HH:mm:ss" ໃຫ້ເປັນ ວັນທີ (YYYY-MM-DD) ແລະ ເວລາ (HH:mm:ss) 
-const parseDateTime = (dateTimeStr) => {
-  if (!dateTimeStr || !dateTimeStr.includes(' ')) {
-    return { date: '', time: '00:00:00' }
-  }
-  const [datePart, timePart] = dateTimeStr.split(' ')
-  
-  // ແປງ DD/MM/YYYY ເປັນ YYYY-MM-DD
-  if (datePart.includes('/')) {
-    const [day, month, year] = datePart.split('/')
-    return {
-      date: `${year}-${month}-${day}`,
-      time: timePart || '00:00:00'
-    }
-  }
-  return { date: datePart, time: timePart || '00:00:00' }
-}
-
-const handleSave = async () => {
-  loading.value = true
-  errorMessage.value = ''
-
-  // 🌟 ແຍກວັນທີ ແລະ ເວລາ ຈາກ Text ທີ່ຜູ້ໃຊ້ປ້ອນ
-  const start = parseDateTime(form.value.startDate)
-  const end = parseDateTime(form.value.endDate)
-
-  // ຈັດຮູບແບບ Payload ໃຫ້ກົງກັບ API ທີ່ກຳນົດ
-  const payload = {
-    item_id: props.room.id,
-    start_date: start.date,
-    stop_date: end.date,
-    start_time: start.time,
-    stop_time: end.time,
-    priority: form.value.priority,
-    description: form.value.objective,
-    // ຂໍ້ມູນເສີມອื่นໆ
-    roomName: props.room.name,
-    meetingTitle: form.value.meetingTitle,
-    departmentCreator: form.value.departmentCreator,
-    departmentUser: form.value.departmentUser,
-    participantsCount: form.value.participantsCount,
-    tel: form.value.tel,
-    username: form.value.username
-  }
-
-  try {
-    const result = await createBooking(payload)
-    console.log('Booking saved successfully:', result)
-    emit('save', result)
-  } catch (error) {
-    errorMessage.value = 'ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໄດ້, ກະລຸນາກວດສອບການເຊື່ອມຕໍ່ ຫຼື Token!'
-    console.error(error)
-  } finally {
-    loading.value = false
-  }
-}
+const room = toRef(props, 'room')
+const { form, loading, errorMessage, setPriority, handleSave } = useBookingForm(room, emit)
 
 const handleClose = () => {
   emit('close')
